@@ -55,12 +55,18 @@ func (n *TrieNode) probability(sequence []string, givenSequence []string, parent
 
     thisCount := n.character.count
     if head == givenHead {
-      child := n.children[head]
-      return child.probability(tails, givenTails, thisCount)
+      if child, exists := n.children[head]; exists {
+	return child.probability(tails, givenTails, thisCount)
+      }
     } else {
       // compute properly when sequence has more characters than one here
-      queryCount := n.children[head].character.count
-      return float64(queryCount) / float64(thisCount)
+      queryCount := 0
+      if child, exists := n.children[head]; exists {
+	queryCount = child.character.count
+      }
+      if thisCount > 0 {
+	return float64(queryCount) / float64(thisCount)
+      } 
     }
   }
   return 0.0

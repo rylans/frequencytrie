@@ -63,3 +63,29 @@ func TestCharacterProbability(t *testing.T){
   assert.Equal(t, 0.25, tree.P("be", "b"))
   assert.Equal(t, 1.0, tree.P("bet", "be"))
 }
+
+func TestCharacterProbabilityFromEmptyTree(t *testing.T){
+  tree := ForCharacters()
+
+  assert.Equal(t, 0.0, tree.P("", ""))
+  assert.Equal(t, 0.0, tree.P("abc", ""))
+  assert.Equal(t, 0.0, tree.P("ab", "a"))
+}
+
+func TestCharacterProbabilityFromSingularTree(t *testing.T){
+  tree := ForCharacters()
+  tree.Insert("Hello")
+
+  assert.Equal(t, 0.0, tree.P("x", ""))
+  assert.Equal(t, 1.0, tree.P("h", ""))
+  assert.Equal(t, 1.0, tree.P("he", ""))
+  assert.Equal(t, 1.0, tree.P("hell", ""))
+  assert.Equal(t, 1.0, tree.P("hell", "h"))
+
+  tree.Insert("helios")
+ 
+  assert.Equal(t, 0.5, tree.P("hell", "hel"))
+
+  //assert.Equal(t, 0.5, tree.P("helios", "h"))
+  //fixme
+}
