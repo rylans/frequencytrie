@@ -12,38 +12,54 @@ func TestWordsTreeIdentity(t *testing.T){
 func TestCharacterKeyGenerationEmptyString(t *testing.T){
   tree := ForCharacters()
 
-  assert.Equal(t, []string{}, tree.keys(""), "incorrect key derivation for empty string")
+  assert.Equal(t, []string{""}, tree.keys(""), "incorrect key derivation for empty string")
 }
 
 func TestCharacterKeyGeneration(t *testing.T){
   tree := ForCharacters()
 
-  assert.Equal(t, []string{"h", "e", "y"}, tree.keys("Hey"), "incorrect key derivation for 'hey'")
+  assert.Equal(t, []string{"h", "e", "y",""}, tree.keys("Hey"), "incorrect key derivation for 'hey'")
 }
 
 func TestCharacterKeyGenerationForHanRunes(t *testing.T){
   tree := ForCharacters()
 
-  assert.Equal(t, []string{"한", "글", "ㅁ"}, tree.keys("한글ㅁ"), "incorrect key derivation for '한글ㅁ'")
+  assert.Equal(t, []string{"한", "글", "ㅁ", ""}, tree.keys("한글ㅁ"), "incorrect key derivation for '한글ㅁ'")
 }
 
 func TestWordKeyGenerationEmptyString(t *testing.T){
   tree := ForWords()
 
-  assert.Equal(t, []string{""}, tree.keys(""), "incorrect key derivation for empty string")
+  assert.Equal(t, []string{"", ""}, tree.keys(""), "incorrect key derivation for empty string")
 }
 
 func TestWordKeyGeneration(t *testing.T){
   tree := ForWords()
 
-  assert.Equal(t, []string{"why", "hello", "there"}, tree.keys("Why hello there"), "incorrect key derivation for sentence")
+  assert.Equal(t, []string{"why", "hello", "there", ""}, tree.keys("Why hello there"), "incorrect key derivation for sentence")
 }
 
 func TestWordKeyGenerationHanRunes(t *testing.T){
   tree := ForWords()
 
   assert.Equal(t,
-    []string{"잘", "아는", "형들"},
+    []string{"잘", "아는", "형들", ""},
     tree.keys("잘 아는 형들"),
     "incorrect key derivation for Han sentence")
+}
+
+func TestCharacterProbability(t *testing.T){
+  tree := ForCharacters()
+  tree.Insert("foo")
+  tree.Insert("bar")
+  tree.Insert("bare")
+  tree.Insert("bag")
+  tree.Insert("bet")
+
+  assert.Equal(t, 1.0, tree.P("foo", "f"))
+  assert.Equal(t, 0.20, tree.P("f", ""))
+  assert.Equal(t, 0.8, tree.P("b", ""))
+  assert.Equal(t, 0.75, tree.P("ba", "b"))
+  assert.Equal(t, 0.25, tree.P("be", "b"))
+  assert.Equal(t, 1.0, tree.P("bet", "be"))
 }
