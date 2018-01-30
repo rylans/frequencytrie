@@ -1,8 +1,19 @@
 package frequencytrie 
 
+import (
+  "strings"
+)
+
+type KeySequenceGenerator func(s string) []string
+
 type TrieNode struct {
   children map[string]TrieNode
   character string
+  keygen KeySequenceGenerator
+}
+
+func (n *TrieNode) keys(str string) []string {
+  return n.keygen(str)
 }
 
 func (n *TrieNode) print() {
@@ -64,4 +75,20 @@ func (n* TrieNode) suggestWithPrefix(remainingChars string, prefix string, candi
 func NewPrefixTree() TrieNode {
   m1 := make(map[string]TrieNode)
   return TrieNode{children: m1, character: ""}
+}
+
+func ForCharacters() TrieNode {
+  f := func(s string) []string {
+    return strings.Split(strings.ToLower(s), "")
+  }
+  m := make(map[string]TrieNode)
+  return TrieNode{children: m, character: "", keygen: f}
+}
+
+func ForWords() TrieNode {
+  f := func(s string) []string {
+    return strings.Split(strings.ToLower(s), " ")
+  }
+  m := make(map[string]TrieNode)
+  return TrieNode{children: m, character: "", keygen: f}
 }
