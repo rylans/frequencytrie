@@ -86,6 +86,9 @@ func TestCharacterProbabilityFromSingularTree(t *testing.T){
  
   assert.Equal(t, 0.5, tree.P("hell", "hel"))
 
-  //assert.Equal(t, 0.5, tree.P("helios", "h"))
-  //fixme
+  assert.Equal(t, 0.5, tree.P("helios", "h"))
+  assert.Equal(t, 0.5, tree.P("helios", "he"))
+  assert.Equal(t, 0.5, tree.P("helios", "hel"))
+  assert.Equal(t, 0.0, tree.P("helios", "hell"))
+  //assert.Equal(t, 1.0, tree.P("helios", "heli"))
 }

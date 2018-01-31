@@ -57,19 +57,50 @@ func (n *TrieNode) probability(sequence []string, givenSequence []string, parent
     if head == givenHead {
       if child, exists := n.children[head]; exists {
 	return child.probability(tails, givenTails, thisCount)
+      } else {
+	return 0.0
       }
+    } else if givenHead != "" {
+      return 0.0
     } else {
       // compute properly when sequence has more characters than one here
       queryCount := 0
       if child, exists := n.children[head]; exists {
 	queryCount = child.character.count
+	if thisCount > 0 {
+	  p := float64(queryCount) / float64(thisCount)
+	  return child.internalP(tails, p)
+	} 
       }
-      if thisCount > 0 {
-	return float64(queryCount) / float64(thisCount)
-      } 
     }
   }
   return 0.0
+}
+
+func (n *TrieNode) internalP(seq []string, prob float64) float64 {
+  if len(seq) == 0 {
+    return prob
+  }
+  head, tail := seq[0], seq[1:]
+  cnt := n.character.count
+
+  if m, exists := n.nextFor(head); exists {
+    subcnt := m.character.count
+    if subcnt == 0 {
+      return prob
+    }
+    thisP := float64(subcnt)/float64(cnt)
+    return m.internalP(tail, prob * thisP)
+  }
+  return prob
+
+}
+
+func (n *TrieNode) nextFor(key string) (*TrieNode, bool) {
+  if next, exists := n.children[key]; exists {
+    return &next, true
+  }
+  return nil, false
 }
 
 func (n *TrieNode) Insert(str string) {
