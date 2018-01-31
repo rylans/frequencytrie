@@ -90,5 +90,81 @@ func TestCharacterProbabilityFromSingularTree(t *testing.T){
   assert.Equal(t, 0.5, tree.P("helios", "he"))
   assert.Equal(t, 0.5, tree.P("helios", "hel"))
   assert.Equal(t, 0.0, tree.P("helios", "hell"))
-  //assert.Equal(t, 1.0, tree.P("helios", "heli"))
+  assert.Equal(t, 1.0, tree.P("helios", "heli"))
 }
+
+func TestCharacterTreeContains(t *testing.T){
+  tree := ForCharacters()
+
+  assert.Equal(t, true, tree.Contains(""))
+  assert.Equal(t, false, tree.Contains("a"))
+
+  tree.Insert("anagrams")
+
+  assert.Equal(t, true, tree.Contains(""))
+  assert.Equal(t, true, tree.Contains("a"))
+  assert.Equal(t, true, tree.Contains("anagrams"))
+  assert.Equal(t, false, tree.Contains("anagrams "))
+  assert.Equal(t, false, tree.Contains("nagrams"))
+}
+
+func TestCharacterTreeContainsWithSpaces(t *testing.T){
+  tree := ForCharacters()
+
+  tree.Insert("a word or two")
+
+  assert.Equal(t, true, tree.Contains(""))
+  assert.Equal(t, true, tree.Contains("a word or two"))
+  assert.Equal(t, false, tree.Contains("a word or 2"))
+}
+
+func TestWordTreeContainsWithSpaces(t *testing.T){
+  tree := ForWords()
+
+  tree.Insert("a word or two")
+
+  assert.Equal(t, true, tree.Contains(""))
+  assert.Equal(t, true, tree.Contains("a word or two"))
+  assert.Equal(t, false, tree.Contains("a word or 2"))
+}
+
+func TestTreeLength(t *testing.T){
+  tree := ForCharacters()
+
+  assert.Equal(t, 0, tree.Len())
+
+  tree.Insert("foo")
+
+  assert.Equal(t, 1, tree.Len())
+
+  tree.Insert("bar")
+  tree.Insert("foo")
+
+  assert.Equal(t, 3, tree.Len())
+}
+
+func TestCharacterTreeFindFirst(t *testing.T){
+  tree := ForCharacters()
+
+  _, found := tree.FindFirst("mal")
+  assert.Equal(t, false, found)
+
+  tree.Insert("normal")
+
+  n, found := tree.FindFirst("mal")
+  assert.Equal(t, true, found)
+  assert.Equal(t, 1, n.Len())
+  assert.Equal(t, "r", n.Key())
+
+  tree.Insert("mal")
+
+  n, found = tree.FindFirst("mal")
+  assert.Equal(t, true, found)
+  assert.Equal(t, 2, n.Len())
+  assert.Equal(t, "", n.Key())
+
+  n, found = tree.FindFirst("ma")
+  assert.Equal(t, true, found)
+  assert.Equal(t, "", n.Key())
+}
+

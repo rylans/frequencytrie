@@ -31,6 +31,10 @@ func (n *TrieNode) keys(str string) []string {
   return append(n.keygen(str), "")
 }
 
+func (n *TrieNode) Key() string {
+  return n.character.key
+}
+
 func (n *TrieNode) print() {
   n.printWithIndentation(" ")
 }
@@ -45,27 +49,26 @@ func (n *TrieNode) printWithIndentation(str string) {
 }
 
 func (n *TrieNode) P(str string, given string) float64 {
-  return n.probability(n.keys(str), n.keys(given), n.character.count)
+  return n.probability(n.keys(str), n.keys(given))
 }
 
-func (n *TrieNode) probability(sequence []string, givenSequence []string, parentCount int) float64 {
+func (n *TrieNode) probability(sequence []string, givenSequence []string) float64 {
   if len(sequence) > 0 && len(givenSequence) > 0 {
     head, tails := sequence[0], sequence[1:]
     givenHead, givenTails := givenSequence[0], givenSequence[1:]
 
     thisCount := n.character.count
     if head == givenHead {
-      if child, exists := n.children[head]; exists {
-	return child.probability(tails, givenTails, thisCount)
+      if child, exists := n.nextFor(head); exists {
+	return child.probability(tails, givenTails)
       } else {
 	return 0.0
       }
     } else if givenHead != "" {
       return 0.0
     } else {
-      // compute properly when sequence has more characters than one here
       queryCount := 0
-      if child, exists := n.children[head]; exists {
+      if child, exists := n.nextFor(head); exists {
 	queryCount = child.character.count
 	if thisCount > 0 {
 	  p := float64(queryCount) / float64(thisCount)
@@ -96,6 +99,47 @@ func (n *TrieNode) internalP(seq []string, prob float64) float64 {
 
 }
 
+func (n *TrieNode) FindFirst(str string) (*TrieNode, bool) {
+  return n.find(n.keys(str))
+}
+
+func (n *TrieNode) find(keys []string) (*TrieNode, bool) {
+  if keys[0] == "" {
+    return nil, false
+  }
+  if n.containsKeySequence(keys) {
+    return n, true
+  }
+
+  for k := range n.children {
+    m := n.children[k]
+    if node, exists := m.find(keys); exists {
+      return node, true
+    }
+  }
+  return nil, false
+
+}
+
+func (n *TrieNode) Contains(str string) bool {
+  return n.containsKeySequence(n.keys(str))
+}
+
+func (n *TrieNode) containsKeySequence(keys []string) bool {
+  if keys[0] == "" {
+    return true
+  }
+  if next, exists := n.nextFor(keys[0]); exists {
+    return next.containsKeySequence(keys[1:])
+  } else {
+    return false
+  }
+}
+
+func (n *TrieNode) Len() int {
+  return n.character.count
+}
+
 func (n *TrieNode) nextFor(key string) (*TrieNode, bool) {
   if next, exists := n.children[key]; exists {
     return &next, true
@@ -114,7 +158,7 @@ func (n *TrieNode) loadWord(keySequence []string){
     rest := keySequence[1:]
     n.character.count = n.character.count + 1
 
-    if v, exists := n.children[head]; exists {
+    if v, exists := n.nextFor(head); exists {
       v.loadWord(rest)
     } else {
       next := NewPrefixTree()
@@ -127,40 +171,12 @@ func (n *TrieNode) loadWord(keySequence []string){
   }
 }
 
-func (n *TrieNode) Suggest(wordPrefix string) []string {
-  return n.suggestWithPrefix(wordPrefix, "", make([]string, 0))
-}
-
-func (n* TrieNode) suggestWithPrefix(remainingChars string, prefix string, candidates []string) []string {
-  if len(remainingChars) > 0 {
-    branchingChar := string(remainingChars[0])
-    rest := remainingChars[1:]
-
-    cnode := n.children[branchingChar]
-    return cnode.suggestWithPrefix(rest, prefix + branchingChar, candidates)
-  }
-
-  for k := range n.children {
-    if v, exists := n.children[k]; exists {
-      candidates = v.suggestWithPrefix("", prefix + v.character.key, candidates) 
-    }
-  }
-
-  if len(n.children) == 0 {
-    candidates = append(candidates, prefix)
-  }
-
-  return candidates
-
-}
-
 func newEmptyCountedKey() *CountedKey {
   return &CountedKey{key: "", count: 0}
 }
 
 func NewPrefixTree() TrieNode {
-  m1 := make(map[string]TrieNode)
-  return TrieNode{children: m1, character: newEmptyCountedKey()}
+  return TrieNode{children: make(map[string]TrieNode), character: newEmptyCountedKey()}
 }
 
 func ForCharacters() TrieNode {
@@ -178,4 +194,3 @@ func ForWords() TrieNode {
   m := make(map[string]TrieNode)
   return TrieNode{children: m, character: newEmptyCountedKey(), keygen: f}
 }
-
