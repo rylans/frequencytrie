@@ -7,11 +7,11 @@ import (
 
 type TransitionChance struct {
   fromKey, toKey string
-  probability float64
+  Probability float64
 }
 
 func (t TransitionChance) String() string {
-  return "{'" + t.fromKey + "' -> '" + t.toKey + "' " + strconv.FormatFloat(t.probability, 'f', -1, 64) + "}"
+  return "{'" + t.fromKey + "' -> '" + t.toKey + "' " + strconv.FormatFloat(t.Probability, 'f', -1, 64) + "}"
 }
 
 type KeySequenceGenerator func(s string) []string
@@ -61,13 +61,13 @@ func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
       transitions = append(transitions, TransitionChance{
 	fromKey: fromkey,
 	toKey: tokey,
-	probability: p});
+	Probability: p});
       upperNode = lowerNode
     } else {
       transitions = append(transitions, TransitionChance{
 	fromKey: upperNode.character.key,
 	toKey: k,
-	probability: 0.0});
+	Probability: 0.0});
       break
     }
   }

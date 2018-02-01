@@ -201,19 +201,19 @@ func TestCharacterTransitionProbabilities(t *testing.T){
   tree.Insert("bandana")
 
   appleTransitions := tree.TransitionProbabilities("apple")
-  assert.Equal(t, 0.5, appleTransitions[0].probability) // "" to "a"
-  assert.Equal(t, 0.5, appleTransitions[1].probability) // "a" to "p"
-  assert.Equal(t, 1.0, appleTransitions[2].probability) // "p" to "p"
-  assert.Equal(t, 1.0, appleTransitions[3].probability) // "p" to "l"
-  assert.Equal(t, 1.0, appleTransitions[4].probability) // "l" to "e"
-  assert.Equal(t, 1.0, appleTransitions[5].probability) // "e" to ""
+  assert.Equal(t, 0.5, appleTransitions[0].Probability) // "" to "a"
+  assert.Equal(t, 0.5, appleTransitions[1].Probability) // "a" to "p"
+  assert.Equal(t, 1.0, appleTransitions[2].Probability) // "p" to "p"
+  assert.Equal(t, 1.0, appleTransitions[3].Probability) // "p" to "l"
+  assert.Equal(t, 1.0, appleTransitions[4].Probability) // "l" to "e"
+  assert.Equal(t, 1.0, appleTransitions[5].Probability) // "e" to ""
   assert.Equal(t, 6, len(appleTransitions))
 
   bandanaTransitions := tree.TransitionProbabilities("bandana")
-  assert.Equal(t, 0.5, bandanaTransitions[0].probability) // "" to "b"
-  assert.Equal(t, 1.0, bandanaTransitions[1].probability) // "b" to "a"
-  assert.Equal(t, 1.0, bandanaTransitions[2].probability) // "a" to "n"
-  assert.Equal(t, 0.5, bandanaTransitions[3].probability) // "n" to "d"
+  assert.Equal(t, 0.5, bandanaTransitions[0].Probability) // "" to "b"
+  assert.Equal(t, 1.0, bandanaTransitions[1].Probability) // "b" to "a"
+  assert.Equal(t, 1.0, bandanaTransitions[2].Probability) // "a" to "n"
+  assert.Equal(t, 0.5, bandanaTransitions[3].Probability) // "n" to "d"
   assert.Equal(t, 8, len(bandanaTransitions))
 }
 
@@ -223,8 +223,8 @@ func TestCharacterTransitionProbabilitiesNoSkip(t *testing.T){
   tree.Insert("axial")
 
   axvialTransitions := tree.TransitionProbabilities("axvial")
-  assert.Equal(t, 1.0, axvialTransitions[0].probability)
-  assert.Equal(t, 1.0, axvialTransitions[1].probability)
-  assert.Equal(t, 0.0, axvialTransitions[2].probability)
+  assert.Equal(t, 1.0, axvialTransitions[0].Probability)
+  assert.Equal(t, 1.0, axvialTransitions[1].Probability)
+  assert.Equal(t, 0.0, axvialTransitions[2].Probability)
   assert.Equal(t, 3, len(axvialTransitions))
 }
