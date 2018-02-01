@@ -3,7 +3,6 @@ package frequencytrie
 import (
   "strings"
   "strconv"
-  "fmt"
 )
 
 type KeySequenceGenerator func(s string) []string
@@ -35,46 +34,27 @@ func (n *TrieNode) Key() string {
   return n.character.key
 }
 
-func (n *TrieNode) print() {
-  n.printWithIndentation(" ")
-}
-
-func (n *TrieNode) printWithIndentation(str string) {
-  for k := range n.children {
-    m := n.children[k]
-    fmt.Println(str, n.character)
-    m.printWithIndentation(str + " ")
-  }
-
-}
-
 func (n *TrieNode) P(str string, given string) float64 {
   return n.probability(n.keys(str), n.keys(given))
 }
 
 func (n *TrieNode) probability(sequence []string, givenSequence []string) float64 {
-  if len(sequence) > 0 && len(givenSequence) > 0 {
-    head, tails := sequence[0], sequence[1:]
-    givenHead, givenTails := givenSequence[0], givenSequence[1:]
+  head, tails := sequence[0], sequence[1:]
+  givenHead, givenTails := givenSequence[0], givenSequence[1:]
 
-    thisCount := n.character.count
-    if head == givenHead {
-      if child, exists := n.nextFor(head); exists {
-	return child.probability(tails, givenTails)
-      } else {
-	return 0.0
-      }
-    } else if givenHead != "" {
-      return 0.0
-    } else {
-      queryCount := 0
-      if child, exists := n.nextFor(head); exists {
-	queryCount = child.character.count
-	if thisCount > 0 {
-	  p := float64(queryCount) / float64(thisCount)
-	  return child.internalP(tails, p)
-	} 
-      }
+  if head == "" && givenHead == "" {
+    return 1.0
+  }
+  if head == givenHead {
+    if child, exists := n.nextFor(head); exists {
+      return child.probability(tails, givenTails)
+    } 
+  } else if givenHead != "" {
+    return 0.0
+  } else {
+    if child, exists := n.nextFor(head); exists {
+      p := float64(child.character.count) / float64(n.character.count)
+      return child.internalP(tails, p)
     }
   }
   return 0.0
@@ -156,7 +136,7 @@ func (n *TrieNode) loadWord(keySequence []string){
   if len(keySequence) > 0 {
     head := keySequence[0]
     rest := keySequence[1:]
-    n.character.count = n.character.count + 1
+    n.character.count++
 
     if v, exists := n.nextFor(head); exists {
       v.loadWord(rest)
