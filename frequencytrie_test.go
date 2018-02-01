@@ -67,7 +67,7 @@ func TestCharacterProbability(t *testing.T){
 func TestCharacterProbabilityFromEmptyTree(t *testing.T){
   tree := ForCharacters()
 
-  assert.Equal(t, 0.0, tree.P("", ""))
+  assert.Equal(t, 1.0, tree.P("", ""))
   assert.Equal(t, 0.0, tree.P("abc", ""))
   assert.Equal(t, 0.0, tree.P("ab", "a"))
 }
@@ -92,6 +92,30 @@ func TestCharacterProbabilityFromSingularTree(t *testing.T){
   assert.Equal(t, 0.0, tree.P("helios", "hell"))
   assert.Equal(t, 1.0, tree.P("helios", "heli"))
 }
+
+func TestCharacterProbabilityForSeveralWords(t *testing.T){
+  tree := ForCharacters()
+  tree.Insert("aardvark")
+  tree.Insert("buttercup")
+  tree.Insert("chai")
+  tree.Insert("doodle")
+  tree.Insert("doorway")
+
+  assert.Equal(t, 0.2, tree.P("chai", ""))
+  assert.Equal(t, 1.0, tree.P("chai", "c"))
+  assert.Equal(t, 1.0, tree.P("chai", "cha"))
+  assert.Equal(t, 1.0, tree.P("chai", "chai"))
+
+  assert.Equal(t, 0.2, tree.P("doodle", ""))
+  assert.Equal(t, 0.5, tree.P("doodle", "d"))
+  assert.Equal(t, 0.5, tree.P("doodle", "doo"))
+  assert.Equal(t, 0.5, tree.P("doodle", "doo"))
+  assert.Equal(t, 1.0, tree.P("doodle", "dood"))
+
+  assert.Equal(t, 0.0, tree.P("aabc", "aabc"))
+  assert.Equal(t, 1.0, tree.P("aar", "aa"))
+}
+
 
 func TestCharacterTreeContains(t *testing.T){
   tree := ForCharacters()
