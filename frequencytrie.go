@@ -5,6 +5,15 @@ import (
   "strconv"
 )
 
+type TransitionChance struct {
+  fromKey, toKey string
+  probability float64
+}
+
+func (t TransitionChance) String() string {
+  return "{'" + t.fromKey + "' -> '" + t.toKey + "' " + strconv.FormatFloat(t.probability, 'f', -1, 64) + "}"
+}
+
 type KeySequenceGenerator func(s string) []string
 
 type CountedKey struct {
@@ -32,6 +41,35 @@ func (n *TrieNode) keys(str string) []string {
 
 func (n *TrieNode) Key() string {
   return n.character.key
+}
+
+func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
+  keySequence := n.keys(str)
+  transitions := make([]TransitionChance, 0)
+
+
+  upperNode := n
+  var lowerNode *TrieNode
+  for _, k := range keySequence {
+    if next, exists := upperNode.nextFor(k); exists {
+      lowerNode = next
+
+      p := float64(lowerNode.character.count) / float64(upperNode.character.count)
+      if lowerNode.character.count == 0 {
+	p = 1
+      }
+
+      fromkey := upperNode.character.key
+      tokey := lowerNode.character.key
+      transitions = append(transitions, TransitionChance{
+	fromKey: fromkey,
+	toKey: tokey,
+	probability: p});
+      upperNode = lowerNode
+
+    }
+  }
+  return transitions
 }
 
 func (n *TrieNode) P(str string, given string) float64 {
