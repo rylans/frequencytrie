@@ -44,16 +44,13 @@ func (n *TrieNode) Key() string {
 }
 
 func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
-  keySequence := n.keys(str)
   transitions := make([]TransitionChance, 0)
-
 
   upperNode := n
   var lowerNode *TrieNode
-  for _, k := range keySequence {
+  for _, k := range n.keys(str) {
     if next, exists := upperNode.nextFor(k); exists {
       lowerNode = next
-
       p := float64(lowerNode.character.count) / float64(upperNode.character.count)
       if lowerNode.character.count == 0 {
 	p = 1
@@ -66,7 +63,12 @@ func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
 	toKey: tokey,
 	probability: p});
       upperNode = lowerNode
-
+    } else {
+      transitions = append(transitions, TransitionChance{
+	fromKey: upperNode.character.key,
+	toKey: k,
+	probability: 0.0});
+      break
     }
   }
   return transitions

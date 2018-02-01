@@ -216,3 +216,15 @@ func TestCharacterTransitionProbabilities(t *testing.T){
   assert.Equal(t, 0.5, bandanaTransitions[3].probability) // "n" to "d"
   assert.Equal(t, 8, len(bandanaTransitions))
 }
+
+func TestCharacterTransitionProbabilitiesNoSkip(t *testing.T){
+  tree := ForCharacters()
+
+  tree.Insert("axial")
+
+  axvialTransitions := tree.TransitionProbabilities("axvial")
+  assert.Equal(t, 1.0, axvialTransitions[0].probability)
+  assert.Equal(t, 1.0, axvialTransitions[1].probability)
+  assert.Equal(t, 0.0, axvialTransitions[2].probability)
+  assert.Equal(t, 3, len(axvialTransitions))
+}
