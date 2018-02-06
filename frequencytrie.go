@@ -24,9 +24,10 @@ type countedKey struct {
 }
 
 func (k *countedKey) String() string {
-  return k.key + "  " + strconv.Itoa(k.count)
+  return "<" + k.key + ">  " + strconv.Itoa(k.count)
 }
 
+// A Trie is an N-ary tree. All descendants of a given node have the same prefix
 type TrieNode struct {
   children map[string]TrieNode
   character *countedKey
@@ -34,7 +35,12 @@ type TrieNode struct {
 }
 
 func (n TrieNode) String() string {
-  return "TrieNode{" + n.character.String() + "}"
+  ks := make([]string, 0)
+  for k, _ := range n.children {
+    ks = append(ks, k)
+  }
+  keys := strings.Join(ks, ",")
+  return "TrieNode{" + n.character.String() + " (" + keys + ")}"
 }
 
 func (n *TrieNode) keys(str string) []string {
@@ -158,6 +164,7 @@ func (n *TrieNode) containsKeySequence(keys []string) bool {
   }
 }
 
+// Len returns the number of items inserted into the tree
 func (n *TrieNode) Len() int {
   return n.character.count
 }
@@ -169,6 +176,7 @@ func (n *TrieNode) nextFor(key string) (*TrieNode, bool) {
   return nil, false
 }
 
+// Insert a string value into the tree
 func (n *TrieNode) Insert(str string) {
   keySequence := n.keys(str)
   n.loadWord(keySequence)
@@ -183,7 +191,7 @@ func (n *TrieNode) loadWord(keySequence []string){
     if v, exists := n.nextFor(head); exists {
       v.loadWord(rest)
     } else {
-      next := NewPrefixTree()
+      next := newPrefixTree()
       next.keygen = n.keygen
       next.character = newEmptyCountedKey()
       next.character.key = head
@@ -197,7 +205,7 @@ func newEmptyCountedKey() *countedKey {
   return &countedKey{key: "", count: 0}
 }
 
-func NewPrefixTree() TrieNode {
+func newPrefixTree() TrieNode {
   return TrieNode{children: make(map[string]TrieNode), character: newEmptyCountedKey()}
 }
 
@@ -218,3 +226,4 @@ func ForWords() TrieNode {
   m := make(map[string]TrieNode)
   return TrieNode{children: m, character: newEmptyCountedKey(), keygen: f}
 }
+

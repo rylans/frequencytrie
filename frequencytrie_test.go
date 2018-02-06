@@ -6,11 +6,7 @@ import (
 )
 
 func TestWordsTreeWithDifferingKeySequenceGenerators(t *testing.T){
-  assert.NotEqual(t, NewPrefixTree(), ForCharacters())
-}
-
-func TestWordsTreeIdentity(t *testing.T){
-  assert.Equal(t, NewPrefixTree(), NewPrefixTree())
+  assert.NotEqual(t, ForWords(), ForCharacters())
 }
 
 func TestCharacterKeyGenerationEmptyString(t *testing.T){
