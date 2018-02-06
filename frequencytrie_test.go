@@ -5,6 +5,10 @@ import (
   "github.com/stretchr/testify/assert"
 )
 
+func TestWordsTreeWithDifferingKeySequenceGenerators(t *testing.T){
+  assert.NotEqual(t, NewPrefixTree(), ForCharacters())
+}
+
 func TestWordsTreeIdentity(t *testing.T){
   assert.Equal(t, NewPrefixTree(), NewPrefixTree())
 }

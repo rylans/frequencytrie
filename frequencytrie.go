@@ -1,3 +1,4 @@
+// Package frequencytrie provides a trie implementation that can be used to calculate the probability of strings from a corpus of text.
 package frequencytrie 
 
 import (
@@ -14,20 +15,21 @@ func (t TransitionChance) String() string {
   return "{'" + t.fromKey + "' -> '" + t.toKey + "' " + strconv.FormatFloat(t.Probability, 'f', -1, 64) + "}"
 }
 
+// A KeySequenceGenerator splits the input string into a string slice. The elements of the string slice are to be used as the keys of the trie.
 type KeySequenceGenerator func(s string) []string
 
-type CountedKey struct {
+type countedKey struct {
   key string
   count int
 }
 
-func (k *CountedKey) String() string {
+func (k *countedKey) String() string {
   return k.key + "  " + strconv.Itoa(k.count)
 }
 
 type TrieNode struct {
   children map[string]TrieNode
-  character *CountedKey
+  character *countedKey
   keygen KeySequenceGenerator
 }
 
@@ -191,14 +193,15 @@ func (n *TrieNode) loadWord(keySequence []string){
   }
 }
 
-func newEmptyCountedKey() *CountedKey {
-  return &CountedKey{key: "", count: 0}
+func newEmptyCountedKey() *countedKey {
+  return &countedKey{key: "", count: 0}
 }
 
 func NewPrefixTree() TrieNode {
   return TrieNode{children: make(map[string]TrieNode), character: newEmptyCountedKey()}
 }
 
+// ForCharacters creates and initializes a new trie with a KeySequenceGenerator that splits the input string into a lowercase sequence of characters.
 func ForCharacters() TrieNode {
   f := func(s string) []string {
     return strings.Split(strings.ToLower(s), "")
@@ -207,6 +210,7 @@ func ForCharacters() TrieNode {
   return TrieNode{children: m, character: newEmptyCountedKey(), keygen: f}
 }
 
+// ForWords creates and initializes a new trie with a KeySequenceGenerator that splits the input string into a lowercase sequence of words.
 func ForWords() TrieNode {
   f := func(s string) []string {
     return strings.Split(strings.ToLower(s), " ")
