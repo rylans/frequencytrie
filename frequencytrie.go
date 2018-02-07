@@ -4,6 +4,7 @@ package frequencytrie
 import (
   "strings"
   "strconv"
+  "sort"
 )
 
 type TransitionChance struct {
@@ -33,6 +34,20 @@ type countedKey struct {
 
 func (k *countedKey) String() string {
   return "<" + k.key + ">  " + strconv.Itoa(k.count)
+}
+
+type countedKeys []countedKey
+
+func (ck countedKeys) Len() int {
+  return len(ck)
+}
+
+func (ck countedKeys) Swap(i, j int) {
+  ck[i], ck[j] = ck[j], ck[i]
+}
+
+func (ck countedKeys) Less(i, j int) bool {
+  return ck[i].count < ck[j].count
 }
 
 // A Trie is an N-ary tree. All descendants of a given node have the same prefix
@@ -151,6 +166,52 @@ func (n *TrieNode) find(keys []string) (*TrieNode, bool) {
   }
   return nil, false
 
+}
+
+// Return the child node of n for which the key count is greatest.
+// Returns (nil, false) if n is a leaf node
+func (n *TrieNode) maxChild() (*TrieNode, bool) {
+  if len(n.children) == 0 {
+    return nil, false
+  }
+  childNodes := make([]TrieNode, 0)
+  for _, node := range n.children {
+    childNodes = append(childNodes, node)
+  }
+
+  childKeys := make([]countedKey, 0)
+  for _, node := range childNodes {
+    keyptr := node.character
+    childKeys = append(childKeys, *keyptr)
+  }
+
+  sort.Sort(countedKeys(childKeys))
+  return n.nextFor(childKeys[len(childKeys)-1].key)
+}
+
+// Return the most probable string in trie n.
+func (n *TrieNode) mostProbable() string {
+  nodeChain := make([]TrieNode, 0)
+
+  cNode := n
+  for {
+    child, found := cNode.maxChild()
+    if !found {
+      break
+    }
+
+    nodeChain = append(nodeChain, *child)
+    cNode = child
+  }
+
+  stringParts := make([]string, 0)
+  for _, m := range nodeChain {
+    stringParts = append(stringParts, m.character.key)
+  }
+
+  // TODO: Joining keys like this may not make sense depending
+  // on the KeySequenceGenerator.
+  return strings.Join(stringParts, "")
 }
 
 func (n *TrieNode) Contains(str string) bool {

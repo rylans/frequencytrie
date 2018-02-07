@@ -228,3 +228,34 @@ func TestCharacterTransitionProbabilitiesNoSkip(t *testing.T){
   assert.Equal(t, 0.0, axvialTransitions[2].Probability)
   assert.Equal(t, 3, len(axvialTransitions))
 }
+
+func TestMaxChild(t *testing.T){
+  tree := ForCharacters()
+
+  _, found := tree.maxChild()
+  assert.Equal(t, false, found)
+
+  tree.Insert("even")
+
+  onlyChild, found := tree.maxChild()
+  assert.Equal(t, true, found)
+  assert.Equal(t, "e", onlyChild.character.key)
+
+  tree.Insert("kind")
+  tree.Insert("kitchen")
+
+  child, found := tree.maxChild()
+  assert.Equal(t, true, found)
+  assert.Equal(t, "k", child.character.key)
+
+  tree.Insert("every")
+  tree.Insert("exit")
+
+  child, found = tree.maxChild()
+  assert.Equal(t, true, found)
+  assert.Equal(t, "e", child.character.key)
+
+  tree.Insert("every")
+
+  assert.Equal(t, "every", tree.mostProbable())
+}
