@@ -15,6 +15,14 @@ func (t TransitionChance) String() string {
   return "{'" + t.fromKey + "' -> '" + t.toKey + "' " + strconv.FormatFloat(t.Probability, 'f', -1, 64) + "}"
 }
 
+func product(tcs []TransitionChance) float64 {
+  product := 1.0
+  for _, tc := range tcs {
+    product *= tc.Probability
+  }
+  return product
+}
+
 // A KeySequenceGenerator splits the input string into a string slice. The elements of the string slice are to be used as the keys of the trie.
 type KeySequenceGenerator func(s string) []string
 
@@ -52,11 +60,15 @@ func (n *TrieNode) Key() string {
 }
 
 func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
+  return n.transitionProbabilities(n.keys(str))
+}
+
+func (n *TrieNode) transitionProbabilities(sequence []string) []TransitionChance {
   transitions := make([]TransitionChance, 0)
 
   upperNode := n
   var lowerNode *TrieNode
-  for _, k := range n.keys(str) {
+  for _, k := range sequence {
     if next, exists := upperNode.nextFor(k); exists {
       lowerNode = next
       p := float64(lowerNode.character.count) / float64(upperNode.character.count)
@@ -72,10 +84,14 @@ func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
 	Probability: p});
       upperNode = lowerNode
     } else {
+      prb := 0.0
+      if k == "" {
+	prb = 1.0
+      }
       transitions = append(transitions, TransitionChance{
 	fromKey: upperNode.character.key,
 	toKey: k,
-	Probability: 0.0});
+	Probability: prb});
       break
     }
   }
@@ -83,48 +99,36 @@ func (n *TrieNode) TransitionProbabilities(str string) []TransitionChance {
 }
 
 func (n *TrieNode) P(str string, given string) float64 {
-  return n.probability(n.keys(str), n.keys(given))
+  return n.probs(n.keys(str), n.keys(given))
 }
 
-func (n *TrieNode) probability(sequence []string, givenSequence []string) float64 {
-  head, tails := sequence[0], sequence[1:]
-  givenHead, givenTails := givenSequence[0], givenSequence[1:]
-
-  if head == "" && givenHead == "" {
-    return 1.0
-  }
-  if head == givenHead {
-    if child, exists := n.nextFor(head); exists {
-      return child.probability(tails, givenTails)
-    } 
-  } else if givenHead != "" {
+func (n *TrieNode) probs(sequence []string, given []string) float64 {
+  givenNode, exists := n.find(sequence)
+  if !exists {
+    if sequence[0] == "" {
+      return 1.0
+    }
     return 0.0
-  } else {
-    if child, exists := n.nextFor(head); exists {
-      p := float64(child.character.count) / float64(n.character.count)
-      return child.internalP(tails, p)
-    }
   }
-  return 0.0
+
+  givenKeyLength := len(given) - 1
+
+  if !keySequenceEquals(sequence, given[:givenKeyLength]) {
+    return 0.0
+  }
+
+  transitionProbs := givenNode.transitionProbabilities(sequence)
+  return product(transitionProbs[givenKeyLength:])
 }
 
-func (n *TrieNode) internalP(seq []string, prob float64) float64 {
-  if len(seq) == 0 {
-    return prob
-  }
-  head, tail := seq[0], seq[1:]
-  cnt := n.character.count
-
-  if m, exists := n.nextFor(head); exists {
-    subcnt := m.character.count
-    if subcnt == 0 {
-      return prob
+func keySequenceEquals(seq1 []string, seq2 []string) bool {
+  equal := true
+  for i, val := range seq2 {
+    if seq1[i] != val {
+      equal = false
     }
-    thisP := float64(subcnt)/float64(cnt)
-    return m.internalP(tail, prob * thisP)
   }
-  return prob
-
+  return equal
 }
 
 func (n *TrieNode) FindFirst(str string) (*TrieNode, bool) {
@@ -226,4 +230,5 @@ func ForWords() TrieNode {
   m := make(map[string]TrieNode)
   return TrieNode{children: m, character: newEmptyCountedKey(), keygen: f}
 }
+
 

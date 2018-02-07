@@ -108,7 +108,7 @@ func TestCharacterProbabilityForSeveralWords(t *testing.T){
 
   assert.Equal(t, 0.2, tree.P("doodle", ""))
   assert.Equal(t, 0.5, tree.P("doodle", "d"))
-  assert.Equal(t, 0.5, tree.P("doodle", "doo"))
+  assert.Equal(t, 0.5, tree.P("doodle", "do"))
   assert.Equal(t, 0.5, tree.P("doodle", "doo"))
   assert.Equal(t, 1.0, tree.P("doodle", "dood"))
 
